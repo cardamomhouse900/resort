@@ -32,6 +32,8 @@ const nextConfig: NextConfig = {
     // CDNs for correctly sized AVIF/WebP, so no image work runs on Workers.
     loader: "custom",
     loaderFile: "./src/lib/image-loader.ts",
+    // 60 = hero images under a gradient; 75 = everything else.
+    qualities: [60, 75],
   },
 
   async headers() {

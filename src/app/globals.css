@@ -20,6 +20,7 @@
   /* Typography (variables are injected by next/font in layout.tsx) */
   --font-serif: var(--font-cormorant), "Georgia", serif;
   --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-serif-italic: var(--font-cormorant-italic), "Georgia", serif;
 
   /* Fluid display sizes */
   --text-display: clamp(2.75rem, 8vw, 6.5rem);
@@ -33,6 +34,72 @@
 
   /* Motion */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-hero-zoom: hero-zoom 2.2s var(--ease-out-soft) both;
+  --animate-rise: rise 1.1s var(--ease-out-soft) both;
+  --animate-scroll-cue: scroll-cue 2.4s ease-in-out infinite;
+
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  /* Movement only — no opacity — so hero text is visible (and counts for LCP) on first paint. */
+  @keyframes rise {
+    from {
+      transform: translateY(18px);
+    }
+    to {
+      transform: none;
+    }
+  }
+  @keyframes scroll-cue {
+    0% {
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+    45% {
+      transform: scaleY(1);
+      transform-origin: top;
+    }
+    55% {
+      transform: scaleY(1);
+      transform-origin: bottom;
+    }
+    100% {
+      transform: scaleY(0);
+      transform-origin: bottom;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll reveals (driven by components/layout/RevealObserver.tsx)
+   Content is only hidden once JS has started (html[data-motion="on"]), and
+   never for users who prefer reduced motion — so nothing depends on JS.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-motion="on"] [data-reveal]:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  html[data-motion="on"] [data-reveal="image"]:not(.is-revealed) {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(12% 0 0 0);
+  }
+  [data-reveal] {
+    transition:
+      opacity 0.9s var(--ease-out-soft),
+      transform 0.9s var(--ease-out-soft),
+      clip-path 1.2s var(--ease-out-soft);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  [data-reveal="image"] {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
 @layer base {

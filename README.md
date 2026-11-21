@@ -42,6 +42,20 @@ npx wrangler d1 create mountain-resort-tag-cache   # paste database_id into wran
 
 Secrets are set with `npx wrangler secret put NAME` (never committed).
 
+## Replacing placeholder content
+
+Until the database and admin dashboard exist (Phases 3–4), all content lives in three files:
+
+| What                                                         | Where                               |
+| ------------------------------------------------------------ | ----------------------------------- |
+| Resort name, contact details, address                        | `src/config/site.ts`                |
+| Rooms, facilities, activities, places, testimonials, gallery | `src/content/placeholder-data.ts`   |
+| Placeholder photographs (with photographer credits)          | `src/content/placeholder-images.ts` |
+
+Pages read content only through `src/services/content.ts`, which switches to the database in Phase 3 —
+the placeholder data then becomes the seed. Sample testimonials are never shown when
+`NEXT_PUBLIC_SHOW_SAMPLE_BADGES` is not `true`.
+
 ## Caching model
 
 `cacheComponents` is **off** because OpenNext on Cloudflare does not fully support it yet. Public content is
