@@ -59,7 +59,7 @@ const registry: Record<IconName, LucideIcon> = {
   leaf: Leaf,
 };
 
-export const iconNames = Object.keys(registry) as IconName[];
+export { iconNames } from "./iconNames";
 
 export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   const Component = registry[name] ?? Leaf;

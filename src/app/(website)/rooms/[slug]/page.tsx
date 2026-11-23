@@ -9,7 +9,10 @@ import { Icon } from "@/components/ui/Icon";
 import { PageHero } from "@/components/ui/PageHero";
 import { SampleBadge } from "@/components/ui/SampleBadge";
 import { showSampleBadges } from "@/config/site";
-import { getRoomTypeBySlug, getRoomTypes } from "@/services/content";
+import { JsonLd } from "@/components/ui/JsonLd";
+import { pageMetadata } from "@/lib/seo";
+import { roomSchema } from "@/lib/structured-data";
+import { getRoomTypeBySlug, getRoomTypes, getSiteSettings } from "@/services/content";
 import { formatINR } from "@/utils/format";
 
 export async function generateStaticParams() {
@@ -21,17 +24,21 @@ export async function generateMetadata({ params }: PageProps<"/rooms/[slug]">): 
   const { slug } = await params;
   const room = await getRoomTypeBySlug(slug);
   if (!room) return {};
-  return {
+  return pageMetadata({
     title: room.name,
     description: `${room.summary} Sleeps up to ${room.maxOccupancy}. From ${formatINR(room.pricePerNight)} per night.`,
-    alternates: { canonical: `/rooms/${room.slug}` },
-    openGraph: { images: [{ url: room.images[0].src, alt: room.images[0].alt }] },
-  };
+    path: `/rooms/${room.slug}`,
+    image: room.images[0],
+  });
 }
 
 export default async function RoomDetailPage({ params }: PageProps<"/rooms/[slug]">) {
   const { slug } = await params;
-  const [room, allRooms] = await Promise.all([getRoomTypeBySlug(slug), getRoomTypes()]);
+  const [room, allRooms, settings] = await Promise.all([
+    getRoomTypeBySlug(slug),
+    getRoomTypes(),
+    getSiteSettings(),
+  ]);
   if (!room) notFound();
 
   const others = allRooms.filter((r) => r.slug !== room.slug);
@@ -156,6 +163,7 @@ export default async function RoomDetailPage({ params }: PageProps<"/rooms/[slug
       )}
 
       <BookingCta />
+      <JsonLd data={roomSchema(settings, room)} />
     </>
   );
 }

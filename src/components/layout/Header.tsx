@@ -35,7 +35,9 @@ export function Header({ siteName }: { siteName: string }) {
   }, []);
 
   const solid = scrolled;
-  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  // "/" must match exactly, otherwise Home would be highlighted on every page.
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <>

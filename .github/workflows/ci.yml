@@ -1,0 +1,69 @@
+# Runs on every push and pull request: formatting, lint, types, unit + integration tests,
+# production build and browser tests. Uses a throwaway PostgreSQL and placeholder keys only —
+# no real secrets are needed (Razorpay Checkout is not opened in CI).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/resort
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/resort_test
+      NEXT_PUBLIC_SITE_URL: http://localhost:3100
+      NEXT_PUBLIC_SHOW_SAMPLE_BADGES: "true"
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder
+      NEXT_PUBLIC_RAZORPAY_KEY_ID: rzp_test_ci
+      RAZORPAY_KEY_ID: rzp_test_ci
+      RAZORPAY_KEY_SECRET: ci-placeholder
+      RAZORPAY_WEBHOOK_SECRET: ci-placeholder
+      CRON_SECRET: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Create databases
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE resort"
+          PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE resort_test"
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - name: Prepare database for the build (placeholder content)
+        run: npx prisma migrate deploy && npm run db:seed
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Browser tests (Razorpay Checkout test skipped — no real keys in CI)
+        run: npx playwright test --grep-invert "reaches Razorpay Checkout"
+        env:
+          PW_CHANNEL: chromium
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

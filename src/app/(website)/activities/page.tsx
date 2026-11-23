@@ -7,13 +7,17 @@ import { SampleBadge } from "@/components/ui/SampleBadge";
 import { img } from "@/content/placeholder-images";
 import { getActivities } from "@/services/content";
 import { activityPriceLabel } from "@/utils/format";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Activities & Experiences",
-  description:
-    "Off-road trail drives, guided nature walks, sunrise treks, campfire evenings and picnics — outdoor experiences for families and friends in the mountains.",
-  alternates: { canonical: "/activities" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: "Activities & Experiences",
+    description:
+      "Off-road trail drives, guided nature walks, sunrise treks, campfire evenings and picnics — outdoor experiences for families and friends in the mountains.",
+    path: "/activities",
+    image: img.jeepRoad,
+  });
+}
 
 export default async function ActivitiesPage() {
   const activities = await getActivities();

@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { mainNav, bookingHref } from "@/config/navigation";
-import type { siteConfig } from "@/config/site";
 import { SampleBadge } from "@/components/ui/SampleBadge";
+import type { SiteSettings } from "@/types/content";
 import { phoneDigits } from "@/utils/format";
 
-type Settings = typeof siteConfig;
-
-export function Footer({ settings }: { settings: Settings }) {
+export function Footer({ settings }: { settings: SiteSettings }) {
   const year = new Date().getFullYear();
   const { contact } = settings;
 

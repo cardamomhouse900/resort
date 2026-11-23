@@ -10,10 +10,27 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "cf:build": "opennextjs-cloudflare build",
-    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
+    "cf:build": "cross-env PRISMA_RUNTIME=workerd opennextjs-cloudflare build",
+    "preview": "npm run cf:build && opennextjs-cloudflare preview",
+    "deploy": "node scripts/deploy.mjs",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:local:init": "node scripts/local-db.mjs init",
+    "db:local:start": "node scripts/local-db.mjs start",
+    "db:local:stop": "node scripts/local-db.mjs stop",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate",
+    "test": "vitest run",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "admin:add": "tsx scripts/add-admin.ts",
+    "deploy:check": "node scripts/deploy.mjs --build",
+    "prod:db": "node scripts/prod-db.mjs",
+    "e2e": "playwright test",
+    "e2e:live": "node scripts/e2e-live.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
@@ -29,7 +46,6 @@
     "react-dom": "19.3.0",
     "resend": "^6.39.0",
     "server-only": "^0.0.1",
-    "swiper": "^14.4.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -40,6 +56,8 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.10",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
     "prettier": "^3.10.1",
@@ -48,6 +66,10 @@
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^5",
+    "vitest": "^3.2.7",
     "wrangler": "^4.166.0"
+  },
+  "imports": {
+    "#prisma": "./src/generated/prisma/client.ts"
   }
 }

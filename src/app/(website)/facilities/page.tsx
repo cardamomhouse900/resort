@@ -7,13 +7,17 @@ import { SampleBadge } from "@/components/ui/SampleBadge";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { img } from "@/content/placeholder-images";
 import { getFacilities } from "@/services/content";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Resort Facilities & Amenities",
-  description:
-    "Restaurant, campfire evenings, outdoor seating, free parking, Wi-Fi, indoor and outdoor games — the facilities that make your mountain stay easy.",
-  alternates: { canonical: "/facilities" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: "Resort Facilities & Amenities",
+    description:
+      "Restaurant, campfire evenings, outdoor seating, free parking, Wi-Fi, indoor and outdoor games — the facilities that make your mountain stay easy.",
+    path: "/facilities",
+    image: img.patio,
+  });
+}
 
 export default async function FacilitiesPage() {
   const facilities = await getFacilities();

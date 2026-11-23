@@ -1,23 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { A11y, Keyboard, Navigation } from "swiper/modules";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { GalleryItem } from "@/types/content";
-import "swiper/css";
 
 /**
  * Swipeable gallery with a native <dialog> lightbox.
- * Only loaded on pages that show a gallery.
+ *
+ * The carousel is plain CSS scroll-snap: swiping, momentum and trackpad scrolling are
+ * handled by the browser itself, so no slider library is downloaded (Swiper used to
+ * add ~30 KB of JavaScript to every page with a gallery). The buttons only scroll the
+ * track; arrow keys work when the track has focus.
  */
 export function GalleryCarousel({ items, showBadges }: { items: GalleryItem[]; showBadges: boolean }) {
   const [active, setActive] = useState<number | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  // Callback refs held in state so Swiper re-initialises navigation once the buttons mount.
-  const [prevEl, setPrevEl] = useState<HTMLButtonElement | null>(null);
-  const [nextEl, setNextEl] = useState<HTMLButtonElement | null>(null);
+  const trackRef = useRef<HTMLUListElement>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -26,35 +27,60 @@ export function GalleryCarousel({ items, showBadges }: { items: GalleryItem[]; s
     if (active === null && dialog.open) dialog.close();
   }, [active]);
 
+  const updateEnds = useCallback(() => {
+    const t = trackRef.current;
+    if (!t) return;
+    setAtStart(t.scrollLeft <= 4);
+    setAtEnd(t.scrollLeft + t.clientWidth >= t.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const t = trackRef.current;
+    if (!t) return;
+    updateEnds();
+    t.addEventListener("scroll", updateEnds, { passive: true });
+    window.addEventListener("resize", updateEnds);
+    return () => {
+      t.removeEventListener("scroll", updateEnds);
+      window.removeEventListener("resize", updateEnds);
+    };
+  }, [updateEnds]);
+
+  const scrollByPage = (dir: 1 | -1) => {
+    const t = trackRef.current;
+    const slide = t?.querySelector("li");
+    if (!t || !slide) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    t.scrollBy({ left: dir * slide.getBoundingClientRect().width, behavior: reduce ? "auto" : "smooth" });
+  };
+
   const step = (dir: 1 | -1) => setActive((i) => (i === null ? i : (i + dir + items.length) % items.length));
 
   const current = active !== null ? items[active] : null;
+  const navButton =
+    "text-forest ring-forest/30 hover:bg-beige inline-flex size-12 items-center justify-center rounded-full ring-1 transition-colors disabled:opacity-40 disabled:hover:bg-transparent";
 
   return (
     <>
       <div className="relative">
-        <Swiper
-          modules={[Navigation, Keyboard, A11y]}
-          slidesPerView={1.15}
-          spaceBetween={12}
-          keyboard={{ enabled: true }}
-          navigation={{ prevEl, nextEl }}
-          breakpoints={{
-            640: { slidesPerView: 1.6, spaceBetween: 16 },
-            1024: { slidesPerView: 2.4, spaceBetween: 20 },
-            1440: { slidesPerView: 3.1, spaceBetween: 24 },
-          }}
-          a11y={{ prevSlideMessage: "Previous photo", nextSlideMessage: "Next photo" }}
-          className="overflow-visible!"
+        {/* Bleeds to the right edge of the viewport, like a strip of photos running off the page.
+            `relative` keeps absolutely positioned descendants (sr-only labels) clipped inside the
+            scroller — otherwise they widen the section, which focus can then scroll sideways. */}
+        <ul
+          ref={trackRef}
+          tabIndex={0}
+          aria-label="Photo gallery"
+          className="relative mr-[calc(50%-50vw)] flex snap-x snap-mandatory [scrollbar-width:none] items-start gap-3 overflow-x-auto overscroll-x-contain pr-4 min-[1440px]:gap-6 sm:gap-4 lg:gap-5 [&::-webkit-scrollbar]:hidden"
         >
           {items.map((item, i) => (
-            <SwiperSlide key={item.src} className={i % 2 === 1 ? "md:pt-14" : ""}>
-              <button
-                type="button"
-                onClick={() => setActive(i)}
-                className="group block w-full text-left"
-                aria-label={`Open photo: ${item.caption ?? item.alt}`}
-              >
+            <li
+              key={item.src}
+              className={`w-[85%] shrink-0 snap-start min-[1440px]:w-[31%] sm:w-[60%] lg:w-[40%] ${i % 2 === 1 ? "md:pt-14" : ""}`}
+            >
+              <button type="button" onClick={() => setActive(i)} className="group block w-full text-left">
+                {/* Named by its content (photo alt + visible caption), so the accessible name
+                    always contains the visible text (WCAG 2.5.3 "label in name"). */}
+                <span className="sr-only">Open photo: </span>
                 <span className="bg-beige relative block aspect-[4/5] overflow-hidden rounded-sm">
                   <Image
                     src={item.src}
@@ -71,23 +97,25 @@ export function GalleryCarousel({ items, showBadges }: { items: GalleryItem[]; s
                 </span>
                 {item.caption && <span className="text-ink-muted mt-3 block text-sm">{item.caption}</span>}
               </button>
-            </SwiperSlide>
+            </li>
           ))}
-        </Swiper>
+        </ul>
 
         <div className="mt-8 flex justify-end gap-3">
           <button
-            ref={setPrevEl}
             type="button"
-            className="text-forest ring-forest/30 hover:bg-beige inline-flex size-12 items-center justify-center rounded-full ring-1 transition-colors disabled:opacity-40"
+            onClick={() => scrollByPage(-1)}
+            disabled={atStart}
+            className={navButton}
             aria-label="Previous photos"
           >
             <ChevronLeft className="size-5" aria-hidden="true" />
           </button>
           <button
-            ref={setNextEl}
             type="button"
-            className="text-forest ring-forest/30 hover:bg-beige inline-flex size-12 items-center justify-center rounded-full ring-1 transition-colors disabled:opacity-40"
+            onClick={() => scrollByPage(1)}
+            disabled={atEnd}
+            className={navButton}
             aria-label="Next photos"
           >
             <ChevronRight className="size-5" aria-hidden="true" />

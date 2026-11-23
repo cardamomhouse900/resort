@@ -6,13 +6,17 @@ import { SampleBadge } from "@/components/ui/SampleBadge";
 import { img } from "@/content/placeholder-images";
 import { getSiteSettings } from "@/services/content";
 import { phoneDigits } from "@/utils/format";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact Us",
-  description:
-    "Get in touch for bookings, group stays and questions. Call, WhatsApp or email us, find us on Google Maps, or send a message.",
-  alternates: { canonical: "/contact" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: "Contact Us",
+    description:
+      "Get in touch for bookings, group stays and questions. Call, WhatsApp or email us, find us on Google Maps, or send a message.",
+    path: "/contact",
+    image: img.picnicMisty,
+  });
+}
 
 export default async function ContactPage() {
   const settings = await getSiteSettings();

@@ -79,7 +79,7 @@ export function MobileMenu({ open, onClose, siteName, isActive }: Props) {
 
             <nav aria-label="Mobile" className="container-page flex-1 overflow-y-auto pt-6">
               <ul className="space-y-1">
-                {[{ label: "Home", href: "/" }, ...mainNav].map((item, i) => (
+                {mainNav.map((item, i) => (
                   <m.li
                     key={item.href}
                     initial={{ opacity: 0, y: 16 }}
@@ -89,7 +89,7 @@ export function MobileMenu({ open, onClose, siteName, isActive }: Props) {
                     <Link
                       href={item.href}
                       onClick={onClose}
-                      aria-current={(item.href === "/" ? false : isActive(item.href)) ? "page" : undefined}
+                      aria-current={isActive(item.href) ? "page" : undefined}
                       className="border-line aria-[current=page]:text-olive-ink block border-b py-3 font-serif text-[2rem] leading-tight"
                     >
                       {item.label}

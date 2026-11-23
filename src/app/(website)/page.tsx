@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { siteConfig } from "@/config/site";
 import { ActivitiesOverview } from "@/components/homepage/ActivitiesOverview";
 import { BookingCta } from "@/components/homepage/BookingCta";
 import { FacilitiesOverview } from "@/components/homepage/FacilitiesOverview";
@@ -11,6 +10,9 @@ import { OffRoad } from "@/components/homepage/OffRoad";
 import { RoomsRail } from "@/components/homepage/RoomsRail";
 import { Surroundings } from "@/components/homepage/Surroundings";
 import { Testimonials } from "@/components/homepage/Testimonials";
+import { JsonLd } from "@/components/ui/JsonLd";
+import { pageMetadata } from "@/lib/seo";
+import { resortSchema, websiteSchema } from "@/lib/structured-data";
 import {
   getActivities,
   getAttractions,
@@ -22,13 +24,22 @@ import {
   getTestimonials,
 } from "@/services/content";
 
-export const metadata: Metadata = {
-  // Final keyword targeting ("… resort in [Location]") is set in Phase 7 once the location is confirmed.
-  title: { absolute: `${siteConfig.name} | Nature Stay with Cottages & Off-Road Trails` },
-  description:
-    "Escape to a peaceful mountain resort surrounded by lush greenery. Comfortable cottages, campfire evenings, off-road trails and family-friendly experiences.",
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { name, location, isPlaceholder } = await getSiteSettings();
+  // Once the real location is entered in Settings (and placeholder mode is off),
+  // the title targets "mountain resort in <location>" searches.
+  const where =
+    !isPlaceholder && location
+      ? `Mountain Resort in ${location}`
+      : "Nature Stay with Cottages & Off-Road Trails";
+  return pageMetadata({
+    title: `${name} | ${where}`,
+    absoluteTitle: true,
+    description:
+      "Escape to a peaceful mountain resort surrounded by lush greenery. Comfortable cottages, campfire evenings, off-road trails and family-friendly experiences.",
+    path: "/",
+  });
+}
 
 export default async function HomePage() {
   const [settings, rooms, facilities, activities, nearby, attractions, testimonials, gallery] =
@@ -59,6 +70,8 @@ export default async function HomePage() {
       <NearbyOverview nearby={nearby} attractions={attractions} />
       <Testimonials items={testimonials} />
       <BookingCta />
+      <JsonLd data={resortSchema(settings, rooms, facilities, gallery)} />
+      <JsonLd data={websiteSchema(settings)} />
     </>
   );
 }

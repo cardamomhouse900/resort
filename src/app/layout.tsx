@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { preconnect } from "react-dom";
 import { siteConfig } from "@/config/site";
+import { defaultSocialImage } from "@/lib/seo";
+import { getSiteSettings } from "@/services/content";
 import "./globals.css";
 
 // Self-hosted at build time by next/font: no external font request, no layout shift.
@@ -29,23 +31,30 @@ const manrope = Manrope({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteConfig.url),
-  title: {
-    default: `${siteConfig.name} | Mountain Nature Stay`,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  applicationName: siteConfig.name,
-  openGraph: {
-    type: "website",
-    locale: siteConfig.locale,
-    siteName: siteConfig.name,
-  },
-  // Until real content replaces the placeholders, keep search engines out.
-  // Phase 7 switches this on for production.
-  robots: siteConfig.isPlaceholder ? { index: false, follow: false } : undefined,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [s, preview] = await Promise.all([getSiteSettings(), defaultSocialImage()]);
+  return {
+    metadataBase: new URL(siteConfig.url),
+    title: {
+      default: `${s.name} | Mountain Nature Stay`,
+      template: `%s | ${s.name}`,
+    },
+    description: s.description,
+    applicationName: s.name,
+    openGraph: {
+      type: "website",
+      locale: siteConfig.locale,
+      siteName: s.name,
+      images: [preview],
+    },
+    twitter: { card: "summary_large_image", images: [preview.url] },
+    // Search engines are kept out until an admin turns off "placeholder content" in
+    // Settings — sample text and stock photos must never be indexed as the real resort.
+    robots: s.isPlaceholder
+      ? { index: false, follow: false }
+      : { index: true, follow: true, "max-image-preview": "large" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#244A35",
@@ -54,9 +63,12 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  // Open connections to the image CDNs early: the hero (LCP) image comes from one of them.
-  preconnect("https://res.cloudinary.com");
-  preconnect("https://images.unsplash.com");
+  // With direct delivery the hero (LCP) image comes from an image CDN: open that connection early.
+  // With Cloudflare delivery images are same-origin, so no extra connection is needed.
+  if (process.env.NEXT_PUBLIC_IMAGE_DELIVERY !== "cloudflare") {
+    preconnect("https://res.cloudinary.com");
+    preconnect("https://images.unsplash.com");
+  }
 
   return (
     <html lang="en-IN" className={`${cormorant.variable} ${cormorantItalic.variable} ${manrope.variable}`}>

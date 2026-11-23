@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 
 export default function NotFound() {
   return (
@@ -14,7 +13,7 @@ export default function NotFound() {
           href="/"
           className="bg-cream text-forest inline-flex min-h-12 items-center justify-center rounded-full px-7 font-semibold hover:bg-white"
         >
-          Back to {siteConfig.shortName}
+          Back to the homepage
         </Link>
         <Link
           href="/rooms"

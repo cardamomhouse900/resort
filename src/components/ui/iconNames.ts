@@ -1,0 +1,30 @@
+import type { IconName } from "@/types/content";
+
+/** Icons admins can choose from (kept separate from Icon.tsx so forms don't bundle every icon). */
+export const iconNames: IconName[] = [
+  "parking",
+  "wifi",
+  "restaurant",
+  "campfire",
+  "outdoor-seating",
+  "indoor-games",
+  "outdoor-games",
+  "power-backup",
+  "hot-water",
+  "first-aid",
+  "trekking",
+  "kids",
+  "tv",
+  "balcony",
+  "kettle",
+  "wardrobe",
+  "shower",
+  "mountain-view",
+  "bed",
+  "users",
+  "clock",
+  "map-pin",
+  "car",
+  "star",
+  "leaf",
+];

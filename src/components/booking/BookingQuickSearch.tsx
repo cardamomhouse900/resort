@@ -12,7 +12,7 @@ export function BookingQuickSearch({ tone = "light" }: { tone?: "light" | "dark"
     <form
       action="/booking"
       method="get"
-      className={`bg-cream/95 grid gap-x-6 gap-y-3 rounded-2xl p-4 shadow-[0_20px_60px_-30px_rgb(0_0_0/0.5)] backdrop-blur-md sm:grid-cols-2 lg:grid-cols-[1fr_1fr_0.7fr_0.7fr_auto] lg:items-end lg:rounded-full lg:py-3 lg:pr-3 lg:pl-8 ${
+      className={`bg-cream/95 grid gap-x-6 gap-y-3 rounded-2xl p-4 shadow-[0_20px_60px_-30px_rgb(0_0_0/0.5)] backdrop-blur-md sm:grid-cols-2 lg:grid-cols-[1fr_1fr_0.7fr_0.7fr_auto] lg:items-end lg:rounded-full lg:py-3 lg:pr-5 lg:pl-8 ${
         tone === "dark" ? "ring-line ring-1" : ""
       }`}
       aria-label="Check availability"
@@ -47,7 +47,7 @@ export function BookingQuickSearch({ tone = "light" }: { tone?: "light" | "dark"
       </label>
       <button
         type="submit"
-        className="bg-forest text-cream hover:bg-mountain min-h-12 rounded-full px-8 text-[0.9375rem] font-semibold transition-colors sm:col-span-2 lg:col-span-1"
+        className="bg-forest text-cream hover:bg-mountain min-h-12 rounded-full px-8 text-[0.9375rem] font-semibold transition-colors sm:col-span-2 lg:col-span-1 lg:self-center"
       >
         Check availability
       </button>

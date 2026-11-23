@@ -10,10 +10,13 @@ type Props = {
   breadcrumbs: Crumb[];
 };
 
-/** Image banner used at the top of every inner page (the page's LCP element). */
+/**
+ * Full-screen image banner at the top of every inner page (the page's LCP element),
+ * matching the homepage hero.
+ */
 export function PageHero({ title, eyebrow, intro, image, breadcrumbs }: Props) {
   return (
-    <section className="bg-forest relative isolate flex min-h-[62svh] items-end overflow-hidden md:min-h-[70svh]">
+    <section className="bg-forest relative isolate flex min-h-svh items-end overflow-hidden">
       <Photo
         image={image}
         sizes="100vw"
@@ -23,7 +26,8 @@ export function PageHero({ title, eyebrow, intro, image, breadcrumbs }: Props) {
         badgePosition="bottom-right"
         overlay="bg-linear-to-t from-forest/90 via-forest/35 to-forest/30"
       />
-      <div className="container-page pt-32 pb-12 md:pb-16">
+      {/* Extra bottom space on phones keeps the text clear of the fixed "Book Your Stay" bar. */}
+      <div className="container-page pt-32 pb-28 md:pb-20">
         <Breadcrumbs items={breadcrumbs} />
         {eyebrow && <p className="eyebrow text-beige! mt-8">{eyebrow}</p>}
         <h1 className="text-h1 text-cream! mt-3 max-w-4xl">{title}</h1>

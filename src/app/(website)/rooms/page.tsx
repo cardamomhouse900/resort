@@ -10,13 +10,17 @@ import { SampleBadge } from "@/components/ui/SampleBadge";
 import { img } from "@/content/placeholder-images";
 import { getRoomTypes } from "@/services/content";
 import { formatINR } from "@/utils/format";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Rooms & Cottages",
-  description:
-    "Comfortable cottages and rooms surrounded by greenery and mountain views — for couples, friends and families. See occupancy, beds, amenities and prices.",
-  alternates: { canonical: "/rooms" },
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageMetadata({
+    title: "Rooms & Cottages",
+    description:
+      "Comfortable cottages and rooms surrounded by greenery and mountain views — for couples, friends and families. See occupancy, beds, amenities and prices.",
+    path: "/rooms",
+    image: img.cabinsPath,
+  });
+}
 
 export default async function RoomsPage() {
   const rooms = await getRoomTypes();

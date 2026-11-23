@@ -110,3 +110,24 @@ export type Testimonial = {
 };
 
 export type GalleryItem = ImageAsset & { caption?: string };
+
+/** Public business details and policies (from the SiteSetting table). */
+export type SiteSettings = {
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  /** Public site URL (from the environment, not the database). */
+  url: string;
+  locale: string;
+  location: string;
+  isPlaceholder: boolean;
+  contact: { phone: string; whatsapp: string; email: string; address: string; mapsUrl: string | null };
+  /** Map coordinates, if entered in Settings. */
+  geo: { latitude: number; longitude: number } | null;
+  checkInTime: string;
+  checkOutTime: string;
+  bookingPolicy: string;
+  cancellationPolicy: string;
+  advancePercent: number;
+};
